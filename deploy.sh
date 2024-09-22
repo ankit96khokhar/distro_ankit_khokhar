@@ -37,7 +37,7 @@ destroy_terraform() {
 }
 
 # Main script logic
-initialize_and_validate
-apply_terraform
+#initialize_and_validate
+#apply_terraform
 
-#destroy_terraform
+destroy_terraform

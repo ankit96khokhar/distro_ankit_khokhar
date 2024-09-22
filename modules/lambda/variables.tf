@@ -2,12 +2,12 @@ variable "filename" {
   type        = string
 }
 
-variable "function_name" {
-  type        = string
+variable "lambda_function_names" {
+  type        = list(string)
 }
 
-variable "handler" {
-  type        = string
+variable "handlers" {
+  type        = list(string)
 }
 
 variable "runtime" {

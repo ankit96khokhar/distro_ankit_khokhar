@@ -11,11 +11,11 @@ variable "method" {
   default     = "GET"
 }
 
-variable "lambda" {
+variable "lambda_functions" {
   description = "The lambda function name to invoke"
 }
 
-variable "lambda_arn" {
+variable "lambda_arns" {
   description = "The lambda arn to invoke"
 }
 
@@ -37,4 +37,16 @@ variable "rate_limit" {
 
 variable "quota_limit" {
   description = "Quota limit"
+}
+
+variable "paths" {
+  description = "paths"
+}
+
+variable "http_methods" {
+  default = "http_methods"
+}
+
+variable "lambda_function_names" {
+  default = "lambda_function_names"
 }

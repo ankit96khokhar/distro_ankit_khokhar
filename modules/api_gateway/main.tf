@@ -5,36 +5,40 @@ resource "aws_api_gateway_rest_api" "api" {
 }
 
 resource "aws_api_gateway_resource" "resource" {
-  path_part   = "resource"
+  count = length(var.paths)
+  path_part   = var.paths[count.index]
   parent_id   = aws_api_gateway_rest_api.api.root_resource_id
   rest_api_id = aws_api_gateway_rest_api.api.id
 }
 
 resource "aws_api_gateway_method" "method" {
+  count = length(var.http_methods)
   rest_api_id   = aws_api_gateway_rest_api.api.id
-  resource_id   = aws_api_gateway_resource.resource.id
-  http_method   = var.method
+  resource_id   = aws_api_gateway_resource.resource[count.index].id
+  http_method   = var.http_methods[count.index]
   authorization = "NONE"
 }
 
 resource "aws_api_gateway_integration" "integration" {
+  count = length(var.http_methods)
   rest_api_id             = aws_api_gateway_rest_api.api.id
-  resource_id             = aws_api_gateway_resource.resource.id
-  http_method             = aws_api_gateway_method.method.http_method
+  resource_id             = aws_api_gateway_resource.resource[count.index].id
+  http_method             = aws_api_gateway_method.method[count.index].http_method
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
-  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda_arn}/invocations"
+  uri                     = "arn:aws:apigateway:${var.region}:lambda:path/2015-03-31/functions/${var.lambda_arns[count.index]}/invocations"
 }
 
 # Lambda
 resource "aws_lambda_permission" "apigw_lambda" {
+  count = length(var.paths)
   statement_id  = uuid()
   action        = "lambda:InvokeFunction"
-  function_name = var.lambda_arn
+  function_name = var.lambda_arns[count.index]
   principal     = "apigateway.amazonaws.com"
 
   # More: http://docs.aws.amazon.com/apigateway/latest/developerguide/api-gateway-control-access-using-iam-policies-to-invoke-api.html
-  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method.http_method}${aws_api_gateway_resource.resource.path}"
+  source_arn = "arn:aws:execute-api:${var.region}:${var.account_id}:${aws_api_gateway_rest_api.api.id}/*/${aws_api_gateway_method.method[count.index].http_method}${aws_api_gateway_resource.resource[count.index].path}"
   depends_on    = ["aws_api_gateway_rest_api.api", "aws_api_gateway_resource.resource"]
 }
 
